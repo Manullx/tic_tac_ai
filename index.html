@@ -6,6 +6,86 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <div id="gameBoard" style="grid">
+    </div>
 </body>
+<script>
+
+    //Events
+    addEventListener("load", _ => {
+        
+        for ( let row = 1; row <= 3; row++ ) {
+            
+            for ( let col = 1; col <= 3; col++ ) {
+                
+                createSquare( row, col );
+            }
+        }
+    });
+
+    //Functions
+    function clickSquare( el, square_row, square_column ) {
+        
+        el.target.innerHTML = "X";
+        el.target.disabled = true;
+
+        const req = new Request(
+            `${backendUrl}/square`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ row: square_row, col: square_column })
+            }
+        );
+        
+        fetch(req).then( res => {
+            
+            res.json().then( data => {
+                
+                const ai_square = document.getElementById(`square_${ data.row }_${ data.col }`);
+                
+                ai_square.innerHTML = "O";
+                ai_square.disabled = true;
+            } );
+        } );
+    }
+
+    function createSquare( row, col ) {
+
+        const newSquare = document.createElement("button");
+        newSquare.className = "square";
+        newSquare.id = `square_${ row }_${ col }`;
+        newSquare.style = `grid-row: ${ row }; grid-column: ${ col }`;
+        newSquare.onclick = el => clickSquare(el, row, col);
+
+        gameBoard.appendChild( newSquare );
+    }
+
+
+    const backendUrl = "http://127.0.0.1:8000";
+
+    const gameBoard = document.getElementById("gameBoard");
+    const squares = [];
+
+</script>
+<style>
+    
+    #gameBoard {
+        
+        background-color: red;
+        
+        display: grid;
+
+        width: fit-content;
+        height: fit-content;
+    }
+
+    .square {
+        
+        width: 65px;
+        height: 65px;
+
+    }
+
+</style>
 </html>
