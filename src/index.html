@@ -23,6 +23,7 @@
         }
     });
 
+
     //Functions
     function clickSquare( el, square_row, square_column ) {
         
@@ -82,21 +83,47 @@
 
 </script>
 <style>
+
+    html, body {
+
+        background-color: #F1F1F1;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        height: 100%;
+        width: 100%;
+
+    }
     
     #gameBoard {
-        
-        background-color: red;
+
+        background-color: #E9E9E9;
         
         display: grid;
-
         width: fit-content;
         height: fit-content;
+        
+        padding: 5px;
+
+        border-radius: 10px;
+        border-color: #90BBFF;
+        border-style: solid;
+        border-width: 3px;
     }
 
     .square {
+
+        background-color: white;
+
+        margin: 1px;
         
         width: 65px;
         height: 65px;
+
+        border-color: #90BBFF;
+        border-radius: 10px;
 
     }
 
