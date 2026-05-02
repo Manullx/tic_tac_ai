@@ -59,11 +59,11 @@
         }
         
         const req = new Request(
-            `${backendUrl}/square`,
+            `${backendUrl}/play`,
             {
                 method: "POST",
                 headers: { 'Content-Type': "application/json" },
-                body: JSON.stringify({ state: gameState })
+                body: JSON.stringify({ game_id: gameId, state: gameState })
             }
         );
         

@@ -1,59 +1,33 @@
 import random
-from typing import List
 from datetime import datetime
 from fastapi import FastAPI
-from fastapi.requests import Request
-from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from sqlmodel import Column, JSON, String, Field, SQLModel, Session, create_engine
+from fastapi.responses import JSONResponse, HTMLResponse
+from sqlmodel import Session
 
-
-#Models
-class Game( SQLModel, table = True ):
-
-    id: int | None = Field( default = None, primary_key = True )
-    finished: bool
-    started_at:  datetime
-    finished_at: datetime | None
-
-
-class Play( SQLModel, table = True ):
-
-    game_id: int = Field( foreign_key = "game.id" )
-    id: int | None = Field( default = None, primary_key = True )
-    state: List[ str ] = Field( sa_column = Column( JSON ) )
-
-
-#Classes
-class GameState( BaseModel ):
-
-    state: list
-
+from db import session, Game, Play
 
 #Functions
 def create_game() -> int:
 
     game = Game( finished = False, started_at = datetime.now() )
 
-    session = Session( engine )
-
     session.add( game )
-
     session.commit()
 
     return game.id
+
+
+def create_play( game_id: int, state: list ) -> None:
+
     
+    play = Play( game_id = game_id, state = state )
+    
+    session.add( play )
+    session.commit()
 
-#Execution
+    return
 
-#DB
-db_name = "db.sqlite"
-db_uri = f"sqlite:///{db_name}"
-
-engine = create_engine( db_uri, echo = True )
-
-SQLModel.metadata.create_all( engine )
 
 #FastAPI
 app = FastAPI()
@@ -81,11 +55,11 @@ def game():
     return JSONResponse( { "game_id": game_id }, status_code = 200 )
 
 
-@app.post("/square")
-async def square( game_state: GameState ):
+@app.post("/play")
+def play( play: Play ):
     
-    req_body = game_state.model_dump()
-    state = req_body['state']
-
+    game_id, state, id = play.model_dump().values()
+    
+    create_play( game_id, state )
 
     return JSONResponse({ 'row': random.randint( 1, 3 ), 'col': random.randint(1, 3) })
