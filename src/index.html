@@ -13,6 +13,24 @@
 
     //Events
     addEventListener("load", _ => {
+
+        const req = new Request(
+            `${backendUrl}/game`,
+            {
+                method: "GET"
+            }
+        )
+
+        fetch(req).then( res => {
+            
+            if ( res.status == 200 ) {
+                
+                res.json().then( data => {
+                    
+                    gameId = data['game_id'];
+                });
+            }
+        });
         
         for ( let row = 1; row <= 3; row++ ) {
             
@@ -80,6 +98,7 @@
 
     const gameBoard = document.getElementById("gameBoard");
     const squares = [];
+    let gameId;
 
 </script>
 <style>
