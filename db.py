@@ -7,7 +7,7 @@ from sqlmodel import Session, Column, JSON, Field, SQLModel, create_engine
 class Game( SQLModel, table = True ):
 
     id: int | None = Field( default = None, primary_key = True )
-    finished: bool
+    finished: bool = Field( default = False )
     started_at:  datetime
     finished_at: datetime | None
 
@@ -15,16 +15,18 @@ class Game( SQLModel, table = True ):
 class Play( SQLModel, table = True ):
 
     game_id: int = Field( foreign_key = "game.id" )
-    id: int | None = Field( default = None, primary_key = True )
-    state: List[ str ] = Field( sa_column = Column( JSON ) )
+    play_id: int | None = Field( default = None, primary_key = True )
+    play_n: int
+    player: str
+    row: int
+    col: int
+    reward: float
 
 
 db_name = "db.sqlite"
 db_uri = f"sqlite:///{db_name}"
 
-engine = create_engine( db_uri, echo = True )
+engine = create_engine( db_uri, echo = False )
 session = Session( engine )
 
 SQLModel.metadata.create_all( engine )
-
-
