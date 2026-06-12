@@ -32,9 +32,9 @@
             }
         });
         
-        for ( let row = 1; row <= 3; row++ ) {
+        for ( let row = 0; row <= 2; row++ ) {
             
-            for ( let col = 1; col <= 3; col++ ) {
+            for ( let col = 0; col <= 2; col++ ) {
                 
                 createSquare( row, col );
             }
@@ -63,7 +63,7 @@
             {
                 method: "POST",
                 headers: { 'Content-Type': "application/json" },
-                body: JSON.stringify({ game_id: gameId, state: gameState })
+                body: JSON.stringify({ game_id: gameId, row: square_row, col: square_column })
             }
         );
         
@@ -87,7 +87,7 @@
         const newSquare = document.createElement("button");
         newSquare.className = "square";
         newSquare.id = `square_${ row }_${ col }`;
-        newSquare.style = `grid-row: ${ row }; grid-column: ${ col }`;
+        newSquare.style = `grid-row: ${ row + 1 }; grid-column: ${ col + 1 }`;
         newSquare.onclick = el => clickSquare(el, row, col);
 
         gameBoard.appendChild( newSquare );
