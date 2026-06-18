@@ -6,7 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="gameBoard">
+    <div>
+
+        <div>
+            <h1 id="gameWinner"></h1>
+        </div>
+        <div id="gameBoard">
+        </div>
     </div>
 </body>
 <script>
@@ -72,11 +78,29 @@
             if ( res.status == 200 ) {
 
                 res.json().then( data => {
-                    
-                    const ai_square = document.getElementById(`square_${ data.row }_${ data.col }`);
-                    
-                    ai_square.innerHTML = "O";
-                    ai_square.disabled = true;
+
+                    if ( data.row !== undefined && data.col !== undefined ) {
+
+                        const ai_square = document.getElementById(`square_${ data.row }_${ data.col }`);
+                        
+                        ai_square.innerHTML = "O";
+                        ai_square.disabled = true;
+                    }
+
+                    if ( data.finished ) {
+
+                        const gameWinner = document.getElementById("gameWinner");
+                        gameWinner.innerText = !data.draw ? `Vitória do ${ data.winner }` : "Empate"
+
+                        for ( let i = 0; i <= 2; i++) {
+                            
+                            for ( let j = 0; j <= 2; j++) {
+
+                                const square = document.getElementById(`square_${ i }_${ j }`);
+                                square.disabled = true;
+                            }
+                        }
+                    }
                 } );
             }
         } );
@@ -113,6 +137,14 @@
 
         height: 100%;
         width: 100%;
+
+    }
+
+    #gameWinner {
+        
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
     }
     
