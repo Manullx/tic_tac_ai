@@ -132,6 +132,7 @@ def play( play: PlayRequest ):
             
             game.finished = True
             game.finished_at = datetime.now()
+            session.commit()
             return JSONResponse({ 'finished': True, 'winner': winner })
         
         model_plays = [
@@ -159,6 +160,7 @@ def play( play: PlayRequest ):
             
             game.finished = True
             game.finished_at = datetime.now()
+            session.commit()
             return JSONResponse({ 'finished': True, 'winner': winner, 'row': model_row, 'col': model_col  })
             
         return JSONResponse({ 'finished': False, 'winner': None, 'row': model_row, 'col': model_col })
