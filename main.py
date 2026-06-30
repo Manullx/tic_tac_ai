@@ -36,7 +36,7 @@ def create_play( session: Session, game: Game, player: str, row: int, col: int )
     reward = 0
 
     if player == "O":
-        
+
         reward = estimate_reward( game, row, col )
 
     play = Play( game_id = game.id, play_n = len( game.plays ), player = player, row = row, col = col, reward = reward )
@@ -148,6 +148,12 @@ def play( play: PlayRequest ):
         model_plays = evaluate_game_state( game ) 
             
         if len( model_plays ) == 0:
+
+            game.finished = True
+            game.finished_at = datetime.now()
+
+            session.commit()
+
             return JSONResponse({ 'finished': True, 'winner': None, 'draw': True })
         
         agent_row, agent_col = define_agent_play( game )
