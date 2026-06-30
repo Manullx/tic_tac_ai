@@ -1,30 +1,9 @@
-from typing import List
 from sqlmodel import Session, select
 
-from db import engine, Game
+from db import Game
 
-
-def evaluate_game_state( game: Game ) -> List[ float ]:
-    
-    model_plays = [
-        (0, 0),
-        (0, 1),
-        (0, 2),
-        (1, 0),
-        (1, 1),
-        (1, 2),
-        (2, 0),
-        (2, 1),
-        (2, 2)
-    ]
-    
-    for play in game.plays:
-        model_plays.remove( (play.row, play.col) )
-
-    return model_plays
 
 def estimate_reward( game: Game, row: int, col: int ) -> None:
-
 
     reward = 0.1
     

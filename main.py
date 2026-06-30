@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from sqlmodel import Session, SQLModel, select
 
 from db import engine, Game, Play
-from rl.agent import define_agent_play
-from rl.enviroment import evaluate_game_state, estimate_reward
+from rl.enviroment import estimate_reward
+from rl.agent import evaluate_game_state, define_agent_play
 
 
 #Schemas
