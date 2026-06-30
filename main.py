@@ -137,7 +137,8 @@ def play( play: PlayRequest ):
         create_play( session, game, player = "X", row = player_row, col = player_col )
 
         if winner := verify_win( game ):
-            
+
+            game.winner = winner
             game.finished = True
             game.finished_at = datetime.now()
 
@@ -149,6 +150,7 @@ def play( play: PlayRequest ):
             
         if len( model_plays ) == 0:
 
+            game.draw = True
             game.finished = True
             game.finished_at = datetime.now()
 
@@ -161,7 +163,8 @@ def play( play: PlayRequest ):
         create_play( session, game, player = 'O', row = agent_row, col = agent_col )
 
         if winner := verify_win( game ):
-            
+
+            game.winner = winner
             game.finished = True
             game.finished_at = datetime.now()
 
