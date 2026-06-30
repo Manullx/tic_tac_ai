@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from sqlmodel import Session, SQLModel, select
 
 from db import engine, Game, Play
+from rl.agent import define_agent_play
+from rl.enviroment import evaluate_game_state
 
 
 #Schemas
@@ -133,34 +135,24 @@ def play( play: PlayRequest ):
             game.finished = True
             game.finished_at = datetime.now()
             session.commit()
+            
             return JSONResponse({ 'finished': True, 'winner': winner })
         
-        model_plays = [
-            (0, 0),
-            (0, 1),
-            (0, 2),
-            (1, 0),
-            (1, 1),
-            (1, 2),
-            (2, 0),
-            (2, 1),
-            (2, 2)
-        ]
-        
-        for play in game.plays:
-            model_plays.remove( (play.row, play.col) )
+        model_plays = evaluate_game_state( game ) 
             
         if len( model_plays ) == 0:
             return JSONResponse({ 'finished': True, 'winner': None, 'draw': True })
         
-        model_row, model_col = random.choice( model_plays )
+        agent_row, agent_col = define_agent_play( game )
         
-        create_play( session, game, player = 'O', row = model_row, col = model_col )
+        create_play( session, game, player = 'O', row = agent_row, col = agent_col )
+
         if winner := verify_win( game ):
             
             game.finished = True
             game.finished_at = datetime.now()
             session.commit()
-            return JSONResponse({ 'finished': True, 'winner': winner, 'row': model_row, 'col': model_col  })
+
+            return JSONResponse({ 'finished': True, 'winner': winner, 'row': agent_row, 'col': agent_col  })
             
-        return JSONResponse({ 'finished': False, 'winner': None, 'row': model_row, 'col': model_col })
+        return JSONResponse({ 'finished': False, 'winner': None, 'row': agent_row, 'col': agent_col })
