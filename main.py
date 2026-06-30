@@ -7,7 +7,7 @@ from sqlmodel import Session, SQLModel, select
 
 from db import engine, Game, Play
 from rl.enviroment import estimate_reward
-from rl.agent import evaluate_game_state, define_agent_play
+from rl.agent import define_agent_play
 
 
 #Schemas
@@ -82,7 +82,7 @@ def verify_win( game: Game ) -> str | None:
 
             return col_set.pop()
     
-    # #Verify Diagonals
+    #Verify Diagonals
     first_diagonal = [ game_state[ij][ij] for ij in range(0, 3) ]
     second_diagonal = [ game_state[ij][2 - ij] for ij in range(2, -1, -1) ]
     if len( first_diagonal_set := set(first_diagonal) ) == 1:
@@ -92,6 +92,18 @@ def verify_win( game: Game ) -> str | None:
     if len( second_diagonal_set := set(second_diagonal) ) == 1:
 
             return second_diagonal_set.pop()
+    
+    draw = True
+    for row in game_state:
+
+        if None in row:
+
+            draw = False
+
+    if draw:
+
+        return "|"
+
     
     return None
     
@@ -138,6 +150,16 @@ def play( play: PlayRequest ):
 
         if winner := verify_win( game ):
 
+            if winner == "|":
+
+                game.draw = True
+                game.finished = True
+                game.finished_at = datetime.now()
+
+                session.commit()
+
+                return JSONResponse({ 'finished': True, 'winner': None, 'draw': True })
+
             game.winner = winner
             game.finished = True
             game.finished_at = datetime.now()
@@ -146,19 +168,7 @@ def play( play: PlayRequest ):
             
             return JSONResponse({ 'finished': True, 'winner': winner })
         
-        model_plays = evaluate_game_state( game ) 
-            
-        if len( model_plays ) == 0:
-
-            game.draw = True
-            game.finished = True
-            game.finished_at = datetime.now()
-
-            session.commit()
-
-            return JSONResponse({ 'finished': True, 'winner': None, 'draw': True })
-        
-        agent_row, agent_col = define_agent_play( game )
+        agent_row, agent_col = define_agent_play( session, game )
         
         create_play( session, game, player = 'O', row = agent_row, col = agent_col )
 
