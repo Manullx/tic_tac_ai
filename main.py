@@ -7,7 +7,7 @@ from sqlmodel import Session, SQLModel, select
 
 from db import engine, Game, Play
 from rl.agent import define_agent_play
-from rl.enviroment import evaluate_game_state
+from rl.enviroment import evaluate_game_state, estimate_reward
 
 
 #Schemas
@@ -33,7 +33,13 @@ def create_game() -> int:
 
 def create_play( session: Session, game: Game, player: str, row: int, col: int ) -> None:
 
-    play = Play( game_id = game.id, play_n = len( game.plays ), player = player, row = row, col = col, reward = 0 )
+    reward = 0
+
+    if player == "O":
+        
+        reward = estimate_reward( game, row, col )
+
+    play = Play( game_id = game.id, play_n = len( game.plays ), player = player, row = row, col = col, reward = reward )
 
     session.add( play )
     session.commit()
@@ -134,6 +140,7 @@ def play( play: PlayRequest ):
             
             game.finished = True
             game.finished_at = datetime.now()
+
             session.commit()
             
             return JSONResponse({ 'finished': True, 'winner': winner })
@@ -151,6 +158,7 @@ def play( play: PlayRequest ):
             
             game.finished = True
             game.finished_at = datetime.now()
+
             session.commit()
 
             return JSONResponse({ 'finished': True, 'winner': winner, 'row': agent_row, 'col': agent_col  })
