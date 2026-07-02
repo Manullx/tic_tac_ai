@@ -31,79 +31,35 @@ def create_game() -> int:
         return game.id
 
 
-def create_play( session: Session, game: Game, player: str, row: int, col: int ) -> None:
+def winning_draw( game: Game ) -> str | None:
 
-    reward = 0
-
-    if player == "O":
-
-        reward = estimate_reward( game, row, col )
-
-    play = Play( game_id = game.id, play_n = len( game.plays ), player = player, row = row, col = col, reward = reward )
-
-    session.add( play )
-    session.commit()
-    session.refresh( game )
-
-    return
-
-
-def verify_win( game: Game ) -> str | None:
-
-    game_state = [
-        [None, None, None],
-        [None, None, None],
-        [None, None, None],
-    ]
-
-    for p in game.plays:
-        
-        game_state[p.row][p.col] = p.player
-        
-    #Verify Lines
-    for row in game_state:
-        
-        if None in row:
-            continue
-        
-        if len( row_set := set(row) ) == 1:
-
-            return row_set.pop()
+    last_play = game.plays[-1]
     
-    #Verify Cols
-    for col_i in range(0, 3):
-        
-        col = [ row[col_i] for row in game_state  ]
-        
-        if None in col:
-            continue
-        
-        if len( col_set := set(col) ) == 1:
+    row_formation = [ play.player for play in game.plays if play.row == last_play.row ]
+    if len( row_formation ) == 3 and len( row_formation_set := set( row_formation ) ) == 1:
 
-            return col_set.pop()
+        return row_formation_set.pop()
     
-    #Verify Diagonals
-    first_diagonal = [ game_state[ij][ij] for ij in range(0, 3) ]
-    second_diagonal = [ game_state[ij][2 - ij] for ij in range(2, -1, -1) ]
-    if len( first_diagonal_set := set(first_diagonal) ) == 1:
+    col_formation = [ play.player for play in game.plays if play.col == last_play.col ]
+    if len( col_formation ) == 3 and len( col_formation_set := set( col_formation ) ) == 1:
 
-            return first_diagonal_set.pop()
+        return col_formation_set.pop()
     
-    if len( second_diagonal_set := set(second_diagonal) ) == 1:
+    if (last_play.row, last_play.col) in [(0, 0), (1, 1), (2, 2), (0, 2), (2, 0)]:
 
-            return second_diagonal_set.pop()
+        first_diagonal_formation = [ play.player for play in game.plays if ( play.row, play.col ) in [(0, 0), (1, 1), (2, 2)] ]
+        if len( first_diagonal_formation ) == 3 and len( first_diagonal_formation_set := set( first_diagonal_formation ) ) == 1:
+
+            return first_diagonal_formation_set.pop()
+        
+        second_diagonal_formation = [ play.player for play in game.plays if ( play.row, play.col ) in [(0, 2), (1, 1), (2, 0)] ]
+        if len( second_diagonal_formation ) == 3 and len( second_diagonal_formation_set := set( second_diagonal_formation ) ) == 1:
+
+            return second_diagonal_formation_set.pop()
     
-    draw = True
-    for row in game_state:
-
-        if None in row:
-
-            draw = False
-
-    if draw:
+    if last_play.play_n == 8:
 
         return "|"
-
     
     return None
     
@@ -146,9 +102,12 @@ def play( play: PlayRequest ):
         result = session.exec( query )
         game = result.first()
         
-        create_play( session, game, player = "X", row = player_row, col = player_col )
-
-        if winner := verify_win( game ):
+        player_play = Play( game_id = game.id, play_n = len( game.plays ), player = "X", row = player_row, col = player_col, reward = 0 )
+        session.add( player_play )
+        session.commit()
+        session.refresh( game )
+        
+        if winner := winning_draw( game ):
 
             if winner == "|":
 
@@ -169,10 +128,14 @@ def play( play: PlayRequest ):
             return JSONResponse({ 'finished': True, 'winner': winner })
         
         agent_row, agent_col = define_agent_play( session, game )
-        
-        create_play( session, game, player = 'O', row = agent_row, col = agent_col )
+        agent_reward = estimate_reward( game, agent_row, agent_col )
 
-        if winner := verify_win( game ):
+        agent_play = Play( game_id = game.id, play_n = len( game.plays ), player = "O", row = agent_row, col = agent_col, reward = agent_reward )
+        session.add( agent_play )
+        session.commit()
+        session.refresh( game )
+
+        if winner := winning_draw( game ):
 
             game.winner = winner
             game.finished = True
