@@ -17,7 +17,7 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
 
 
     current_play_n = len(current_game.plays)
-    game_rewards = np.full( shape = (3, 3), fill_value = 0.2 if current_play_n == 1 else 0.1)
+    game_rewards = np.full( shape = (3, 3), fill_value = 0.15 if current_play_n == 1 else 0.1)
 
     query = select( Play ).where( Play.play_n == 0, Play.row == current_game.plays[0].row, Play.col == current_game.plays[0].col )
     equal_games_ids = [ play.game_id for play in session.exec( query ) if play.game_id != current_game.id ]

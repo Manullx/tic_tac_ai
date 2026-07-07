@@ -5,7 +5,7 @@ from db import Game
 
 def estimate_reward( current_game: Game, row: int, col: int ) -> None:
 
-    reward = 0.1
+    reward = 0.0
     
     row_formation = [ p.player for p in current_game.plays if p.row == row]
     col_formation = [ p.player for p in current_game.plays if p.col == col ]
