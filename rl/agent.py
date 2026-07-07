@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from typing import List
 from sqlmodel import Session, select, col
 
@@ -15,22 +16,8 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
         return result[ : len(result) - 1]
 
 
-    game_state = {
-        '0_0': 0,
-        '0_1': 0,
-        '0_2': 0,
-        '1_0': 0,
-        '1_1': 0,
-        '1_2': 0,
-        '2_0': 0,
-        '2_1': 0,
-        '2_2': 0,
-    }
-
-    for play in current_game.plays:
-        del game_state[f'{play.row}_{play.col}']
-
     current_play_n = len(current_game.plays)
+    game_rewards = np.full( shape = (3, 3), fill_value = 0.2 if current_play_n == 1 else 0.1)
 
     query = select( Play ).where( Play.play_n == 0, Play.row == current_game.plays[0].row, Play.col == current_game.plays[0].col )
     equal_games_ids = [ play.game_id for play in session.exec( query ) if play.game_id != current_game.id ]
@@ -42,9 +29,10 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
     for row_i in range(0, 3):
 
         for col_i in range(0, 3):
-            
-            if f'{row_i}_{col_i}' not in game_state.keys():
 
+            if ( row_i, col_i ) in [ ( current_game_play.row, current_game_play.col ) for current_game_play in current_game.plays ]:
+
+                game_rewards[row_i][col_i] = 0
                 continue
 
             query = select( Play ).where( col( Play.game_id ).in_(equal_games_ids), Play.play_n == current_play_n, Play.row == row_i, Play.col == col_i )
@@ -58,15 +46,18 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
 
                 square_rewards.append(game_total_rewards)
 
-            game_state[ f'{row_i}_{col_i}'] = sum( square_rewards ) / len( square_rewards ) if len( square_rewards ) >= 1 else 0
+            if square_rewards_len:= len(square_rewards) >= 1:
 
-    return [( int(key.split("_")[0] ), int(key.split("_")[1]), value ) for key, value in game_state.items() ]
+                game_rewards[row_i][col_i] = sum( square_rewards ) / square_rewards_len
+    
+
+    game_weights = game_rewards / game_rewards.sum()
+    return game_weights.reshape(1, 9)[0]
 
 
 def define_agent_play( session: Session, current_game: Game ) -> tuple:
 
-    evaluated_game = evaluate_game_state( session, current_game )
-    print(f"Game ID: {current_game.id}\tPlay n: { len(current_game.plays) }\tEvaluated Game: { evaluated_game }")
-    row, col, choice_mean = max(evaluated_game, key = lambda s: s[2])
+    game_weights = evaluate_game_state( session, current_game )
+    agent_choice = np.random.choice(9, size = 1, p = game_weights)[0]
 
-    return (row, col)
+    return [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)][agent_choice]
