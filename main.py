@@ -123,6 +123,11 @@ def play( play: PlayRequest ):
             game.finished = True
             game.finished_at = datetime.now()
 
+            last_agent_play = game.plays[-2]
+            last_agent_play.reward = 0
+            
+            session.add( last_agent_play )
+
             session.commit()
             
             return JSONResponse({ 'finished': True, 'winner': winner })
@@ -140,6 +145,11 @@ def play( play: PlayRequest ):
             game.winner = winner
             game.finished = True
             game.finished_at = datetime.now()
+
+            last_agent_play = game.plays[-1]
+            last_agent_play.reward = last_agent_play.reward + 1
+
+            session.add( last_agent_play )
 
             session.commit()
 
