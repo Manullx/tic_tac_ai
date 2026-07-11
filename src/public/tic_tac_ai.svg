@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="150" y1="25" x2="150" y2="175" id="gradient-0" gradientTransform="matrix(1, 0.000001, 0, 0.938635, -0.000001, 1.534114)">
+      <stop offset="0" style="stop-color: rgb(247, 247, 247);"/>
+      <stop offset="1" style="stop-color: rgb(132, 132, 132);"/>
+    </linearGradient>
+  </defs>
+  <rect y="25" width="250" height="150" rx="12" ry="12" style="stroke: rgb(0, 0, 0); fill-rule: nonzero; paint-order: fill; fill: url(&quot;#gradient-0&quot;);" x="25"/>
+  <rect x="187.062" y="266.27" width="13" height="61.997" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(208, 38, 38); transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(0.646267, 0.763111, -0.768988, 0.639327, -95.523925, -222.490153)" rx="5" ry="5"/>
+  <rect x="222.55" y="266.673" width="13" height="61.997" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(208, 38, 38); transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(0.646267, -0.763111, 0.768988, 0.639328, -131.011794, -222.893023)" rx="5" ry="5"/>
+  <ellipse style="fill-opacity: 0; stroke-width: 7px; stroke: rgb(42, 64, 255); fill: rgb(41, 40, 127);" cx="202.5" cy="72.5" rx="22.5" ry="22.5"/>
+  <rect x="100" y="125" width="100" height="25" rx="8" ry="8" style="stroke: rgb(0, 0, 0); fill: rgb(229, 229, 229);"/>
+  <rect x="130" y="125" width="40" height="25" style="stroke: rgb(0, 0, 0); fill: rgb(229, 229, 229);"/>
+</svg>
