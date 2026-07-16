@@ -3,7 +3,7 @@ import "@/app/globals.css";
 import React from "react";
 import Image from "next/image";
 
-export default function GameLayout({ children, }: { children: React.ReactNode}) {
+export default function GameLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
             <body>
