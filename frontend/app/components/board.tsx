@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from "react";
 import Square from "./square";
-import { collectMeta } from "next/dist/build/utils";
+import { useState } from "react";
 
 export default function Board() {
     
@@ -36,7 +35,8 @@ export default function Board() {
                     return row.map( (sqr, col_i) => {
                         
                         return (
-                            <Square 
+                            <Square
+                                key={`${row_i}_${col_i}`}
                                 boardGameState={gameState}
                                 squareRow={row_i}
                                 squareCol={col_i}
