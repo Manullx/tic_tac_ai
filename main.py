@@ -69,7 +69,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5500"],
+    allow_origins=["*"],
     allow_methods = ["*"],
     allow_headers = ["*"]
 )
@@ -77,11 +77,6 @@ app.add_middleware(
 
 #Routes
 @app.get("/")
-def index():
-    return HTMLResponse( open("src/index.html").read(), status_code = 200, media_type = "text/html" )
-
-
-@app.get("/game")
 def game():
     
     game_id: int = create_game()
