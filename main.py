@@ -1,9 +1,11 @@
-import random
+
 from datetime import datetime
+from sqlmodel import Session, SQLModel, select
+from sqlalchemy import func
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
-from sqlmodel import Session, SQLModel, select
 
 from db import engine, Game, Play
 from rl.enviroment import estimate_reward
@@ -151,3 +153,19 @@ def play( play: PlayRequest ):
             return JSONResponse({ 'finished': True, 'winner': winner, 'row': agent_row, 'col': agent_col  })
             
         return JSONResponse({ 'finished': False, 'winner': None, 'row': agent_row, 'col': agent_col })
+
+
+#Dashboard
+@app.get("/dashboard")
+def get_quant_metrics():
+
+    with Session(engine) as session:
+
+        finished_total_games = session.exec( select( func.count(Game.id) ).where( Game.finished ) ).first()
+        winning_total_games = session.exec( select( Game.winner, func.count(Game.id) ).where( Game.finished, Game.draw == False ).group_by( Game.winner ) ).fetchall()
+        draw_total_games = session.exec( select( func.count(Game.id) ).where( Game.draw ) ).first()
+        print(winning_total_games)
+        return JSONResponse(
+            {"totalFinished": finished_total_games, "winning_total": [ {"player": player, "player_total_winning": total } for player, total in winning_total_games], "totalDraw": draw_total_games}, 
+            status_code = 200 
+        )
