@@ -8,9 +8,6 @@ export default async function Game() {
   
   return (
     <div>
-      <div className="flex justify-center p-2">
-        Game ID: { game_id }
-      </div>
       <Board game_id={game_id}/>
     </div>
   )
