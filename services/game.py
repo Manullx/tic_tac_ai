@@ -28,4 +28,4 @@ def get_game( parent_session: Session, game_id: int ) -> Game:
         
         raise HTTPException( detail = "Game not found", status_code = status.HTTP_404_NOT_FOUND)
     
-    return game
+    return game 

@@ -1,10 +1,8 @@
 
 from models.game import Game
-from models.play import Players
+from models.play import Play, Players
 
-def check_winning( current_game: Game ) -> Players | None:
-
-    last_play = current_game.plays[-1]
+def check_winning( current_game: Game, last_play: Play ) -> Players | None:
     
     row_formation = [ play.player for play in current_game.plays if play.row == last_play.row ]
     if len( row_formation ) == 3 and len( row_formation_set := set( row_formation ) ) == 1:

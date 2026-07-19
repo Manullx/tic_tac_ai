@@ -29,7 +29,7 @@ class PostPlayResponse(BaseModel):
     winner: Players | None = Field( default = None )
     draw: bool = Field( default = False )
     player_play: Play
-    agent_play: Play | None
+    agent_play: Play | None = None
 
 
 play_router = APIRouter( prefix = "/play", tags = ["play"] )
@@ -44,10 +44,12 @@ def post_play(*, session: Session = Depends(get_session), req: PostPlayRequest )
 
         raise HTTPException( detail = "Game is already finished.", status_code = status.HTTP_400_BAD_REQUEST )
     
-    player_reward = estimate_play_reward( current_game = game, player = Players.x, row = req.row, col = req.col )
-    player_play = create_play( parent_session = session, game_id = game.id, play_n = len(game.plays), player = Players.x, row = req.row, col = req.col, reward = player_reward )
+    player_play = create_play( parent_session = session, game_id = game.id, play_n = len(game.plays), player = Players.x, row = req.row, col = req.col )
+    player_play.reward = estimate_play_reward( current_game = game, player = Players.x, row = req.row, col = req.col )
+    session.add(player_play)
+    session.commit()
 
-    if winner := check_winning( game ):
+    if winner := check_winning( current_game = game, last_play = player_play ):
 
         game.finished = True
         game.winner = winner
@@ -55,6 +57,7 @@ def post_play(*, session: Session = Depends(get_session), req: PostPlayRequest )
 
         session.add(game)
         session.commit()
+        session.refresh(player_play)
         
         return PostPlayResponse( finished = game.finished, winner = game.winner, player_play = player_play )
     
@@ -68,17 +71,17 @@ def post_play(*, session: Session = Depends(get_session), req: PostPlayRequest )
         
         session.add(game)
         session.commit()
+        session.refresh(player_play)
 
         return PostPlayResponse( finished = game.finished, draw = game.draw, player_play = player_play )
     
     agent_row, agent_col = define_agent_play( parent_session = session, current_game = game)
-    agent_reward = estimate_play_reward( current_game = game, player = Players.o, row = agent_row, col = agent_col )
-    agent_play = create_play( parent_session = session, game_id = game.id, play_n = len(game.plays), player = Players.o, row = agent_row, col = agent_col, reward = agent_reward )
-
+    agent_play = create_play( parent_session = session, game_id = game.id, play_n = len(game.plays), player = Players.o, row = agent_row, col = agent_col )
+    agent_play.reward = estimate_play_reward( current_game = game, player = Players.o, row = agent_row, col = agent_col )
     session.add(agent_play)
     session.commit()
 
-    if winner := check_winning( game ):
+    if winner := check_winning( current_game = game, last_play = agent_play ):
 
         game.finished = True
         game.winner = winner
@@ -86,8 +89,8 @@ def post_play(*, session: Session = Depends(get_session), req: PostPlayRequest )
 
         session.add(game)
         session.commit()
+        session.refresh( player_play, agent_play )
 
         return PostPlayResponse( finished = game.finished, winner = game.winner, player_play = player_play, agent_play = agent_play)
 
-    
     return PostPlayResponse( player_play = player_play, agent_play = agent_play )

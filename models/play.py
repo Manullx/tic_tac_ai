@@ -17,7 +17,7 @@ class Play( SQLModel, table = True ):
     player: Players
     row: int
     col: int
-    reward: float = Field( default = 0, exclude = True )
+    reward: float = Field( default = 0 )
 
     game_id: int = Field( default = None, foreign_key = "game.id" )
     game: Game | None = Relationship( back_populates = "plays" )
