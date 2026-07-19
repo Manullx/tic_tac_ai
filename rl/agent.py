@@ -4,7 +4,8 @@ from typing import List
 from sqlalchemy import func
 from sqlmodel import Session, select, col, or_, and_
 
-from db import Game, Play
+from models.game import Game
+from models.play import Play
 
 
 def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]:    
@@ -43,9 +44,9 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
     return game_rewards / game_rewards.sum()
 
 
-def define_agent_play( session: Session, current_game: Game ) -> tuple:
+def define_agent_play( parent_session: Session, current_game: Game ) -> tuple:
 
-    game_weights = evaluate_game_state( session, current_game )
+    game_weights = evaluate_game_state( parent_session, current_game )
     agent_choice = np.random.choice(9, size = 1, p = game_weights.reshape(1, 9)[0])[0]
     
     return [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)][agent_choice]
