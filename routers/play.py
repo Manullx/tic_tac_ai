@@ -89,7 +89,8 @@ def post_play(*, session: Session = Depends(get_session), req: PostPlayRequest )
 
         session.add(game)
         session.commit()
-        session.refresh( player_play, agent_play )
+        session.refresh( player_play )
+        session.refresh( agent_play )
 
         return PostPlayResponse( finished = game.finished, winner = game.winner, player_play = player_play, agent_play = agent_play)
 
