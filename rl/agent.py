@@ -39,19 +39,28 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
                 
                 if game_plays := [choice_game_p.reward for choice_game_p in choice_p.game.plays if choice_game_p.play_n >= play_n]:
                     
-                    square_rewards.append(sum(game_plays) * len(game_plays))
+                    square_rewards.append( sum(game_plays) * len(game_plays) )
                     square_total_plays += len(game_plays)
                     
             if len(square_rewards):
                 
                 game_rewards[row_i][col_i] = sum(square_rewards) / square_total_plays
                 continue
+
+            else:
+
+                game_rewards[row_i][col_i] = 0.1
+    
     
     abs_min_actions_reward = np.abs( game_rewards.min() )
+    
+    if abs_min_actions_reward == 0:
+        
+        return game_rewards / game_rewards.sum()
+
     game_rewards = game_rewards + abs_min_actions_reward
-    if abs_min_actions_reward != 0:
-        game_rewards[ game_rewards == 0] = 0.1
-        game_rewards[ game_rewards == abs_min_actions_reward ] = 0
+    game_rewards[ game_rewards == 0 ] = 0.1
+    game_rewards[ game_rewards == abs_min_actions_reward ] = 0
 
     return game_rewards / game_rewards.sum()
 
