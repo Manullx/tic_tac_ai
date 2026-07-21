@@ -45,7 +45,7 @@ def post_play(*, session: Session = Depends(get_session), req: PostPlayRequest )
         raise HTTPException( detail = "Game is already finished.", status_code = status.HTTP_400_BAD_REQUEST )
     
     player_play = create_play( parent_session = session, game_id = game.id, play_n = len(game.plays), player = Players.x, row = req.row, col = req.col )
-    player_play.reward = estimate_play_reward( current_game = game, player = Players.x, row = req.row, col = req.col )
+    player_play.reward = - estimate_play_reward( current_game = game, player = Players.x, row = req.row, col = req.col )
     session.add(player_play)
     session.commit()
 
