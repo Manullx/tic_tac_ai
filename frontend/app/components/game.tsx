@@ -89,7 +89,26 @@ export default function Game() {
         });
     }, []);
 
-    
+
+    function handleRefreshGame() {
+
+        createGame().then( game => {
+
+            setGameId(game.id);
+            localStorage.setItem("game_id", String(game.id) );
+
+            setFinishedState(game.finished);
+            setDrawState(game.draw);
+            setWinnerState(game.winner);
+
+            setGameState([
+                [null, null, null],
+                [null, null, null],
+                [null, null, null]
+            ]);
+        });
+    }
+
 
     function handleClickSquare(playerRow: number, playerCol: number) {
 
@@ -122,25 +141,11 @@ export default function Game() {
 
                 return newGame;
             });
-        })
-    }
-    
-    function handleRefreshGame() {
+        }).catch( err => {
+            
+            handleRefreshGame();
 
-        createGame().then( game => {
-
-            setGameId(game.id);
-            localStorage.setItem("game_id", String(game.id) );
-
-            setFinishedState(game.finished);
-            setDrawState(game.draw);
-            setWinnerState(game.winner);
-
-            setGameState([
-                [null, null, null],
-                [null, null, null],
-                [null, null, null]
-            ]);
+            handleClickSquare( playerRow, playerCol );
         });
     }
 
