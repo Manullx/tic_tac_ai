@@ -1,14 +1,10 @@
-import { getGame } from "@/app/lib/api"
+import Game from "@/app/components/game"
 
-import Board from "@/app/components/board"
-
-export default async function Game() {
-  
-  const { game_id } = await getGame();
+export default async function Home() {
   
   return (
     <div>
-      <Board game_id={game_id}/>
+      <Game />
     </div>
   )
 }

@@ -1,20 +1,23 @@
 'use client'
+import { Player, Play } from "@/app/lib/interfaces"
+import { useEffect, useState } from "react";
 
-export default function Square( { boardGameState, squareRow, squareCol, handleClickSquare }: { boardGameState: Array<Array<string | null>>, squareRow: number, squareCol: number, handleClickSquare: any }) {
-
-    let squareColor;
-    if (boardGameState[squareRow][squareCol] != null) {
-        
-        squareColor = boardGameState[squareRow][squareCol] == "X" ? "#C24242" : "#4282C2";
-    }
+export default function Square( { 
+    boardGameState, squareRow, squareCol, handleClickSquare
+ }: { 
+    boardGameState: Array<Array<Play | null>>, squareRow: number, squareCol: number, handleClickSquare: any
+  }) {
 
     return (
         <div 
-            className="flex justify-center items-center w-20 h-20 bg-white m-1 rounded-lg text-xl font-bold"
-            style={{borderColor: squareColor, backgroundColor: squareColor}}
-            onClick={ _ => boardGameState[squareRow][squareCol] ?? handleClickSquare( squareRow, squareCol ) }
+            className = "flex justify-center items-center w-20 h-20 bg-white m-1 rounded-lg text-xl font-bold border-2"
+            style = {{
+                backgroundColor: boardGameState[squareRow][squareCol] == null ? "white" : boardGameState[squareRow][squareCol].player == "X" ? "#f0b5b5" : "#c1d2e2",
+                borderColor: boardGameState[squareRow][squareCol] == null ? "white" : boardGameState[squareRow][squareCol].player == "X" ? "#C24242" : "#4282C2"
+            }}
+            onClick={ _ => handleClickSquare( squareRow, squareCol ) }
         >
-            { boardGameState[squareRow][squareCol] }
+            { boardGameState[squareRow][squareCol] != null ? boardGameState[squareRow][squareCol].player : null  }
         </div>
     )
 } 
