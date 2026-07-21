@@ -12,8 +12,8 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
 
     play_n = len(current_game.plays)
     selected_squares = [(p.row, p.col) for p in current_game.plays]
-    game_rewards = np.full( shape = (3, 3), fill_value = 0.15 )
-
+    game_rewards = np.zeros( shape = (3, 3) )
+    
     equal_plays_q = select( Play.game_id, func.count(Play.game_id).label("total_plays") ).where(
         Play.game_id != current_game.id,
         or_(*[ and_(Play.play_n == current_p.play_n, Play.row == current_p.row, Play.col == current_p.col) for current_p in current_game.plays])
@@ -27,20 +27,32 @@ def evaluate_game_state( session: Session, current_game: Game ) -> List[ float ]
 
             if (row_i, col_i) in selected_squares:
 
-                game_rewards[row_i][col_i] = 0
                 continue
             
             square_rewards = []
+            square_total_plays = 0
             for choice_p in session.exec( select(Play).where(col(Play.game_id).in_(identical_games), Play.play_n == play_n, Play.row == row_i, Play.col == col_i ) ):
                 
-                if rewards_sum := sum([choice_game_p.reward for choice_game_p in choice_p.game.plays if choice_game_p.play_n >= play_n and choice_game_p.game.finished is True]):
-                    
-                    square_rewards.append(rewards_sum)
-                    
-            if square_rewards_length := len(square_rewards):
+                if not choice_p.game.finished:
 
-                game_rewards[row_i][col_i] = sum(square_rewards) / square_rewards_length
+                    continue
                 
+                if game_plays := [choice_game_p.reward for choice_game_p in choice_p.game.plays if choice_game_p.play_n >= play_n]:
+                    
+                    square_rewards.append(sum(game_plays) * len(game_plays))
+                    square_total_plays += len(game_plays)
+                    
+            if len(square_rewards):
+                
+                game_rewards[row_i][col_i] = sum(square_rewards) / square_total_plays
+                continue
+    
+    abs_min_actions_reward = np.abs( game_rewards.min() )
+    game_rewards = game_rewards + abs_min_actions_reward
+    if abs_min_actions_reward != 0:
+        game_rewards[ game_rewards == 0] = 0.1
+        game_rewards[ game_rewards == abs_min_actions_reward ] = 0
+
     return game_rewards / game_rewards.sum()
 
 
