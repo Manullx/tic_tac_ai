@@ -1,23 +1,37 @@
+from typing import List
+from sqlalchemy import func
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
+from sqlmodel import Session, select
+
+from db import get_session
+from models.game import Game
+
+
+class GetGameMetricsResponse(BaseModel):
+
+    total_games: int
+    finished_games: int
+    drawed_games: int
+
+    players_winnings: List[dict]
 
 
 dashboard_router = APIRouter( prefix = "/dashboard", tags = ["dashboard"] )
 
-# @app.get("/dashboard")
-# def get_quant_metrics():
+@dashboard_router.get("/game")
+def get_game_metrics( parent_session: Session = Depends(get_session)):
 
-#     with Session(engine) as session:
-
-#         finished_total_games = session.exec( select( func.count(Game.id) ).where( Game.finished ) ).first()
-#         winning_total_games = session.exec( select( Game.winner, func.count(Game.id) ).where( Game.finished, Game.draw == False ).group_by( Game.winner ) ).fetchall()
-#         draw_total_games = session.exec( select( func.count(Game.id) ).where( Game.draw ) ).first()
-        
-#         return JSONResponse(
-#             {
-#                 "totalFinished": finished_total_games,
-#                 "totalWinning": [ {"player": player, "playerTotalWinning": total } for player, total in winning_total_games],
-#                 "totalDraw": draw_total_games
-#             }, 
-#             status_code = 200 
-#         )
+    total_games = parent_session.exec( select( func.count(Game.id) ) ).first()
+    finished_games = parent_session.exec( select( func.count(Game.id) ).where( Game.finished ) ).first()
+    drawed_games = parent_session.exec( select( func.count(Game.id) ).where( Game.finished, Game.draw ) ).first()
+    
+    players_winnings = parent_session.exec( select(Game.winner, func.count(Game.id) ).where( Game.finished, Game.draw == False ).group_by( Game.winner ) ).fetchall()
+    
+    return GetGameMetricsResponse(
+        total_games = total_games,
+        finished_games = finished_games,
+        drawed_games = drawed_games,
+        players_winnings = [ { 'player': player, "winnings": winnings} for player, winnings in players_winnings ]
+    )
