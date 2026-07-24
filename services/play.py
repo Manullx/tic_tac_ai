@@ -1,11 +1,8 @@
 from fastapi import HTTPException
 
-from sqlmodel import Session, select, col as column
+from sqlmodel import Session, select
 
 from models.play import Play, Players
-from services.game import get_game
-
-from rl.enviroment import estimate_play_reward
 
 def create_play( parent_session: Session, game_id: int, play_n: int, player: Players, row: int, col: int ) -> Play:
     
