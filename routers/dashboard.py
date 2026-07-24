@@ -20,8 +20,8 @@ class GetGameMetricsResponse(BaseModel):
 
 dashboard_router = APIRouter( prefix = "/dashboard", tags = ["dashboard"] )
 
-@dashboard_router.get("/game")
-def get_game_metrics( parent_session: Session = Depends(get_session)):
+@dashboard_router.get("/game", response_model = GetGameMetricsResponse, status_code = 200)
+def get_game_metrics( parent_session: Session = Depends(get_session) ):
 
     total_games = parent_session.exec( select( func.count(Game.id) ) ).first()
     finished_games = parent_session.exec( select( func.count(Game.id) ).where( Game.finished ) ).first()
