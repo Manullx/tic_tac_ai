@@ -1,6 +1,5 @@
 'use client'
-import { Player, Play } from "@/app/lib/interfaces"
-import { useEffect, useState } from "react";
+import { Play } from "@/app/lib/interfaces"
 
 export default function Square( { 
     boardGameState, squareRow, squareCol, handleClickSquare
@@ -12,7 +11,7 @@ export default function Square( {
         
         return (
             <div 
-                className = "flex justify-center items-center w-20 h-20 bg-white m-1 rounded-lg text-xl font-bold"
+                className = "flex justify-center items-center w-20 h-20 bg-white hover:bg-gray-100 m-1 rounded-lg text-xl font-bold"
                 onClick={ _ => handleClickSquare( squareRow, squareCol ) }
             >
             </div>
@@ -25,7 +24,7 @@ export default function Square( {
             style = {{
                 backgroundColor: boardGameState[squareRow][squareCol].player == "X" ? "#f0b5b5" : "#c1d2e2",
                 borderColor: boardGameState[squareRow][squareCol].player == "X" ? "#C24242" : "#4282C2"
-            }}
+            }} 
             onClick={ _ => handleClickSquare( squareRow, squareCol ) }
         >
             { boardGameState[squareRow][squareCol].player }
